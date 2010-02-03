@@ -11,8 +11,10 @@ start(IP, Port, DocRoot) ->
 
 
 yaws_global_configs(IP, Port, DocRoot) -> 
-  Y = yaws_config:yaws_dir(),
-  GC = #gconf{yaws_dir = Y,
+  io:format("IP: ~w  Port ~w DocRoot ~s~n",[IP,Port,DocRoot]),
+  Y = yaws_dir(),
+  %GC = #gconf{yaws_dir = Y,
+  GC = #gconf{
     ebin_dir = [filename:join([Y, "examples/ebin"])],
     include_dir = [filename:join([Y, "examples/include"])],
     trace = false,
@@ -31,3 +33,30 @@ yaws_global_configs(IP, Port, DocRoot) ->
                          {"status", status_responder}]},
   {GC,SC}.
 
+yaws_dir() ->
+    case  yaws_generated:is_local_install() of
+        true ->
+            P = filename:split(code:which(?MODULE)),
+            P1 = del_tail(P),
+            filename:join(P1);
+        false ->
+            code:lib_dir(yaws)
+    end.
+
+del_tail(Parts) ->
+     del_tail(Parts,[]).
+%% Initial ".." should be preserved
+del_tail([".." |Tail], Acc) ->
+    del_tail(Tail, [".."|Acc]);
+del_tail(Parts, Acc) ->
+    del_tail2(Parts, Acc).
+
+%% Embedded ".." should be removed together with preceding dir
+del_tail2([_H, ".." |Tail], Acc) ->
+    del_tail2(Tail, Acc);
+del_tail2([".." |Tail], [_P|Acc]) ->
+    del_tail2(Tail, Acc);
+del_tail2([_X, _Y], Acc) ->
+    lists:reverse(Acc);
+del_tail2([H|T], Acc) ->
+    del_tail2(T, [H|Acc]).
