@@ -23,8 +23,9 @@ start(Conf) ->
   yaws_api:setconf(GC, SC).
 
 yaws_gc() ->
-  Y = yaws_config:yaws_dir(),
-  GC = #gconf{yaws_dir = Y,
+  %Y = yaws_config:yaws_dir(),
+  %GC = #gconf{yaws_dir = Y,
+  GC = #gconf{
               ebin_dir = [],
               include_dir = [],
               trace = false,
